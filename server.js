@@ -11,8 +11,9 @@ app.get('/', (req, res) => {
     res.status(200).send('Hello World')
 })
 
-app.use('/', require('./routes/authRoutes'))
-app.use('/', require('./routes/AppRoutes'))
+app.use('/', require('./routes/routes'))
+
+
 
 connectDB()
 
