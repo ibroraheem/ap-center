@@ -12,6 +12,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/', require('./routes/authRoutes'))
+app.use('/', require('./routes/AppRoutes'))
 
 connectDB()
 

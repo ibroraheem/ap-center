@@ -9,13 +9,13 @@ const AppSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    image: {
-        type: String,
-        required: true,
-    },
-    link: { 
-        type: String,
-        required: true,
+  image:{
+    type: Buffer,
+    required: true
+  },
+    appFile:{
+        type: Buffer,
+        required: true
     },
     contactMail: {
         type: String,
