@@ -10,12 +10,12 @@ const AppSchema = new mongoose.Schema({
         required: true,
     },
   image:{
-    type: Buffer,
-    required: true
+    type: String,
+    required: true,
   },
     appFile:{
-        type: Buffer,
-        required: true
+        type: String,
+        required: true,
     },
     contactMail: {
         type: String,
