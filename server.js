@@ -7,14 +7,11 @@ require('dotenv').config()
 
 app.use(bodyParser.json())
 app.use(cors())
+
 app.get('/', (req, res) => {
-    res.status(200).send('Hello World')
+    res.send('Hello World')
 })
-
 app.use('/', require('./routes/routes'))
-
-
-
 connectDB()
 
 const PORT = process.env.PORT
