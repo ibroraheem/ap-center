@@ -28,7 +28,7 @@ const postApp = async (req, res) => {
 const getApps = async (req, res) => {
     try {
         const apps = await App.find()
-        return res.status(200).json({ apps: apps })
+        return res.status(200).json({ apps: apps }).sort({ createdAt: -1 })
     } catch (err) {
         return res.status(500).json({ message: err.message })
     }

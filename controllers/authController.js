@@ -10,8 +10,9 @@ const register = async (req, res) => {
         const isFirstUser = await User.countDocuments() === 0
         const role = isFirstUser ? 'admin' : 'user'
         if (isFirstUser) {
-            const user = new User({ username, 
-                email, 
+            const user = new User({
+                username,
+                email,
                 password: hashedPassword,
                 confirmationToken: '',
                 role: role,
@@ -20,12 +21,13 @@ const register = async (req, res) => {
             await user.save()
             return res.status(201).json({ message: 'Admin User created' })
         }
-        const user = await findOne({ username})
+        const user = await User.findOne({ username })
         if (user) {
             return res.status(400).json({ message: 'Username already exists' })
         }
         const confirmationToken = jwt.sign({ username, email, password: hashedPassword }, process.env.JWT_SECRET, { expiresIn: '1d' })
-        const newUser = new User({ username,
+        const newUser = new User({
+            username,
             email,
             password: hashedPassword,
             confirmationToken,
@@ -41,7 +43,7 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
-    const {email, username, password } = req.body
+    const { email, username, password } = req.body
     try {
         const user = await User.findOne({ username }) || await User.findOne({ email })
         if (!user) {
@@ -52,14 +54,14 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Username or password is incorrect' })
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' })
-        return res.status(200).json({ message:'User Logged in', token: token })
+        return res.status(200).json({ message: 'User Logged in', token: token })
     } catch (err) {
         return res.status(500).json({ message: err.message })
     }
 }
 
 const confirm = async (req, res) => {
-    const {confirmationToken} = req.params.token
+    const { confirmationToken } = req.params.token
     try {
         const user = await User.findOne({ confirmationToken })
         if (!user) {
@@ -133,7 +135,7 @@ const getUsers = async (req, res) => {
     try {
         const isAdmin = user.role === 'admin'
         if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
-        const users = await User.find({role: 'user'})
+        const users = await User.find({ role: 'user' }).sort({createdAt: -1})
         return res.status(200).json({ users })
     } catch (err) {
         return res.status(500).json({ message: err.message })
@@ -141,18 +143,64 @@ const getUsers = async (req, res) => {
 }
 
 const getUser = async (req, res) => {
-    const{id} = req.params
+    const { id } = req.params
     const token = req.headers.authorization.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     const user = await User.findById(decoded.userId)
     try {
         const isAdmin = user.role === 'admin'
         if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
-        const users = await User.find({id: user._id, role: 'user'})
+        const users = await User.find({ id: user.id, role: 'admin' })
         return res.status(200).json({ users })
     } catch (err) {
         return res.status(500).json({ message: err.message })
     }
 }
 
-module.exports = { register, login, confirm, resendConfirmation, forgotPassword, resetPassword, getUsers, getUser}
+const logout = async (req, res) => {
+    let token = req.headers.authorization.split(' ')[1]
+    try {
+        let token = req.headers.authorization.split(' ')[1]
+        token = jwt.sign({ token: token }, 'secret', { expiresIn: 1 })
+        res.status(200).send({ token, message: 'Logged out' })
+    } catch (error) {
+        res.status(400).send({ message: error.message })
+    }
+}
+
+const revokeAccess = async (req, res) => {
+    const { id } = req.params
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId)
+    try {
+        const isAdmin = user.role === 'admin'
+        if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
+        const user = await User.findById(id)
+        if (!user) return res.status(400).json({ message: 'User not found' })
+        user.access = false
+        await user.save()
+        return res.status(200).json({ message: 'Access revoked' })
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+
+const grantAccess = async (req, res) => {
+    const { id } = req.params
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId)
+    try {
+        const isAdmin = user.role === 'admin'
+        if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
+        const user = await User.findById(id)
+        if (!user) return res.status(400).json({ message: 'User not found' })
+        user.access = true
+        await user.save()
+        return res.status(200).json({ message: 'Access granted' })
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+module.exports = { register, login, confirm, resendConfirmation, forgotPassword, resetPassword, getUsers, getUser, logout, revokeAccess, grantAccess }
