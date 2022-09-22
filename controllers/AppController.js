@@ -18,4 +18,19 @@ const getApp = async (req, res) => {
         return res.status(500).json({ message: err.message })
     }
 }
-module.exports = {getApps, getApp}
+
+const createApp = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId)
+    try {
+        const isAdmin = user.role === 'admin'
+        if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
+        const app = await App.create(req.body)
+        return res.status(201).json({ app })
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+
+module.exports = {getApps, getApp, createApp}
