@@ -10,5 +10,12 @@ const getApps = async (req, res) => {
         return res.status(500).json({ message: err.message })
     }
 }
-
-module.exports = {getApps}
+const getApp = async (req, res) => {
+    try {
+        const app = await App.findById(req.params.id)
+        return res.status(200).json({ app })
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+module.exports = {getApps, getApp}
