@@ -1,5 +1,4 @@
 const express = require('express');
-
 const router = express.Router();
 
 const {postApp, getApps, getApp, updateApp, deleteApp} = require('../controllers/appController');
