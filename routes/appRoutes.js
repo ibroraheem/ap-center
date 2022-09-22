@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {postApp, getApps, getApp, updateApp, deleteApp} = require('../controllers/appController');
+const {postApp, getApps, getApp, updateApp, deleteApp} = require('../controllers/appController')
 
 router.post('/app', postApp);
 router.get('/apps', getApps);
