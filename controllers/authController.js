@@ -126,4 +126,33 @@ const resetPassword = async (req, res) => {
     }
 }
 
-module.exports = { register, login, confirm, resendConfirmation, forgotPassword, resetPassword }
+const getUsers = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId)
+    try {
+        const isAdmin = user.role === 'admin'
+        if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
+        const users = await User.find({role: 'user'})
+        return res.status(200).json({ users })
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+
+const getUser = async (req, res) => {
+    const{id} = req.params
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId)
+    try {
+        const isAdmin = user.role === 'admin'
+        if (!isAdmin) return res.status(401).json({ message: 'Unauthorized' })
+        const users = await User.find({id: user._id, role: 'user'})
+        return res.status(200).json({ users })
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+
+module.exports = { register, login, confirm, resendConfirmation, forgotPassword, resetPassword, getUsers, getUser}
