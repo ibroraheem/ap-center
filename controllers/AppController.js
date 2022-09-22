@@ -18,4 +18,4 @@ const getApp = async (req, res) => {
         return res.status(500).json({ message: err.message })
     }
 }
-module.exports = {getApps}
+module.exports = {getApps, getApp}
