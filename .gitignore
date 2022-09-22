@@ -1,2 +1,4 @@
 /.env
 /node_modules/
+/routes/appRoutes.js
+/controllers/appController.js
